@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="班佛定律與第二位數班佛定律分析工具 - 卡方檢定 Z統計量 AI分析">
+  <title>班佛定律分析器 | Benford's Law Analyzer</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>📊 班佛定律分析器</h1>
+      <p>Benford's Law &amp; Second Digit Analyzer</p>
+      <div class="subtitle">
+        <span class="badge">🔍 第一位數</span>
+        <span class="badge">🔬 第二位數</span>
+        <span class="badge">📈 Z 統計量</span>
+        <span class="badge">χ² 卡方</span>
+        <span class="badge">🤖 AI 分析</span>
+      </div>
+    </header>
+    <div class="card" id="upload-card">
+      <div class="card-title"><span class="icon">📁</span>上傳 CSV 檔案</div>
+      <div class="upload-zone" id="upload-zone">
+        <span class="upload-icon">📄</span>
+        <h3>拖放 CSV 檔案到此處</h3>
+        <p>或點擊此處選擇檔案（支援 UTF-8 / Big5 編碼）</p>
+        <input type="file" id="file-input" accept=".csv,.txt,.tsv">
+      </div>
+      <div class="file-info" id="file-info">
+        <span>✅</span><span id="file-name"></span>
+      </div>
+      <div class="column-selector" id="column-selector">
+        <label for="column-select">選擇要分析的數值欄位：</label>
+        <div class="select-wrapper">
+          <select id="column-select"></select>
+        </div>
+      </div>
+      <button class="btn-analyze" id="btn-analyze">🚀 開始分析</button>
+    </div>
+    <div class="spinner" id="spinner"></div>
+    <div class="results-section" id="results-section">
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span>資料摘要</div>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-value" id="stat-total">—</div><div class="stat-label">有效數據筆數</div></div>
+          <div class="stat-item"><div class="stat-value" id="stat-column">—</div><div class="stat-label">分析欄位</div></div>
+          <div class="stat-item"><div class="stat-value" id="stat-first-anomaly">—</div><div class="stat-label">第一位數 Z 異常</div></div>
+          <div class="stat-item"><div class="stat-value" id="stat-second-anomaly">—</div><div class="stat-label">第二位數 Z 異常</div></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="first-digit">第一位數 (Benford)</button>
+        <button class="tab-btn" data-tab="second-digit">第二位數 (2nd Digit)</button>
+      </div>
+      <div class="tab-content active" id="tab-first-digit">
+        <div class="card">
+          <div class="card-title"><span class="icon">1️⃣</span>第一位數班佛定律分析</div>
+          <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem;">
+            <span style="color:#818cf8;">●</span> 預期頻率（Benford）&nbsp;&nbsp;
+            <span style="color:#fbbf24;">●</span> 觀察頻率
+          </p>
+          <div class="chart-container"><canvas id="chart-first-digit"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">χ²</span>卡方檢定（第一位數）</div>
+          <div id="chi-first"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🧮</span>Z 統計量（第一位數）</div>
+          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">|Z| &gt; 1.96 視為異常（95% 信賴水準）</p>
+          <div class="z-table-wrapper"><table class="z-table" id="z-table-first"></table></div>
+          <div id="verdict-first"></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-second-digit">
+        <div class="card">
+          <div class="card-title"><span class="icon">2️⃣</span>第二位數班佛定律分析</div>
+          <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem;">
+            <span style="color:#a78bfa;">●</span> 預期頻率（2nd Benford）&nbsp;&nbsp;
+            <span style="color:#34d399;">●</span> 觀察頻率
+          </p>
+          <div class="chart-container"><canvas id="chart-second-digit"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">χ²</span>卡方檢定（第二位數）</div>
+          <div id="chi-second"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🧮</span>Z 統計量（第二位數）</div>
+          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">|Z| &gt; 1.96 視為異常（95% 信賴水準）</p>
+          <div class="z-table-wrapper"><table class="z-table" id="z-table-second"></table></div>
+          <div id="verdict-second"></div>
+        </div>
+      </div>
+      <div class="card" id="ai-card">
+        <div class="card-title"><span class="icon">🤖</span>AI 智慧分析報告</div>
+        <div id="ai-report"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🎯</span>整體結論</div>
+        <div id="overall-verdict"></div>
+      </div>
+    </div>
+    <div class="footer">
+      <p>班佛定律分析器 — 資料來源：<a href="https://www.moi.gov.tw/cl.aspx?n=3951" target="_blank">內政部統計資料</a></p>
+      <p>Benford's Law Analyzer &copy; 2026</p>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
